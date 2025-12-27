@@ -10,3 +10,16 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Simple text-outline utility to avoid -webkit-text-stroke artifacts */
+.outline-white-2 {
+  text-shadow:
+    2px 0 #fff,
+    -2px 0 #fff,
+    0 2px #fff,
+    0 -2px #fff,
+    1.5px 1.5px #fff,
+    -1.5px 1.5px #fff,
+    1.5px -1.5px #fff,
+    -1.5px -1.5px #fff;
+}
