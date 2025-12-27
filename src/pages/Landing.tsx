@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Onboarding from '../components/Onboarding';
+import { Github } from 'lucide-react';
 
 export default function Landing() {
 	const { isAuthenticated } = useAuth();
@@ -52,17 +53,17 @@ export default function Landing() {
 					</div>
 					<div className="mt-4 flex items-center justify-center gap-2 text-white">
 						<a
-							href="https://github.com/your-username/udayton-meal-plan-wrapped"
+							href="https://github.com/benjamindrussell/campus-dining-wrapped"
 							target="_blank"
 							rel="noreferrer"
 							className="flex items-center gap-1 underline font-semibold underline-offset-2 hover:text-white/90"
 						>
-							View source
+							<Github className="w-4 h-4" /> View source
 						</a>
 						<span className="text-white font-bold">·</span>
 						<p>
 							Built by{' '}
-							<a href="https://benrussell.dev" target="_blank" rel="noreferrer" className="font-semibold text-white underline underline-offset-2 hover:text-white/90">
+							<a href="https://benrussell.tech" target="_blank" rel="noreferrer" className="font-semibold text-white underline underline-offset-2 hover:text-white/90">
 								Ben Russell
 							</a>
 						</p>
