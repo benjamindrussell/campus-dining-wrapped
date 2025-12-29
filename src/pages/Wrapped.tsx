@@ -7,7 +7,7 @@ import type { SlideProps } from '../components/wrapped/types';
 import IntroSlide from '../components/wrapped/slides/IntroSlide';
 import TopLocationSlide from '../components/wrapped/slides/TopLocationSlide';
 import MostExpensiveSlide from '../components/wrapped/slides/MostExpensiveSlide';
-import UniqueLocationsSlide from '../components/wrapped/slides/UniqueLocationsSlide';
+import MoneySavedSlide from '../components/wrapped/slides/MoneySavedSlide';
 import TimeOfDaySlide from '../components/wrapped/slides/TimeOfDaySlide';
 import SummarySlide from '../components/wrapped/slides/SummarySlide';
 
@@ -31,19 +31,19 @@ export default function Wrapped() {
 				body: 'Placeholder: Your most visited dining spot.',
 			},
 			{
+				key: 'timeOfDay',
+				title: 'Most Active Time',
+				body: 'Placeholder: When you usually grab food.',
+			},
+			{
 				key: 'mostExpensive',
 				title: 'Most Expensive Transaction',
 				body: 'Placeholder: The priciest meal of the year.',
 			},
 			{
-				key: 'uniqueLocations',
-				title: 'Unique Locations',
-				body: 'Placeholder: How many unique places you ate.',
-			},
-			{
-				key: 'timeOfDay',
-				title: 'Most Active Time',
-				body: 'Placeholder: When you usually grab food.',
+				key: 'moneySaved',
+				title: 'Money Saved / Lost',
+				body: 'Your refunds vs spending and net change.',
 			},
 			{
 				key: 'summary',
@@ -99,7 +99,7 @@ export default function Wrapped() {
 		| 'intro'
 		| 'topLocation'
 		| 'mostExpensive'
-		| 'uniqueLocations'
+		| 'moneySaved'
 		| 'timeOfDay'
 		| 'summary';
 
@@ -107,7 +107,7 @@ export default function Wrapped() {
 		intro: IntroSlide,
 		topLocation: TopLocationSlide,
 		mostExpensive: MostExpensiveSlide,
-		uniqueLocations: UniqueLocationsSlide,
+		moneySaved: MoneySavedSlide,
 		timeOfDay: TimeOfDaySlide,
 		summary: SummarySlide,
 	};
@@ -129,6 +129,25 @@ export default function Wrapped() {
 		}),
 	};
 
+	// Adjust UI chrome (progress bars, arrows) per-slide if needed
+	const isTopLocationSlide = slides[index].key === 'topLocation';
+	const isMostExpensiveSlide = slides[index].key === 'mostExpensive';
+	const isTimeOfDaySlide = slides[index].key === 'timeOfDay';
+	const isMoneySavedSlide = slides[index].key === 'moneySaved';
+	const useDarkUiChrome = isTopLocationSlide || isMostExpensiveSlide;
+	const progressTrackClass = useDarkUiChrome ? 'bg-black/30' : 'bg-white/30';
+	const progressFillClass = useDarkUiChrome ? 'bg-black' : 'bg-white';
+	const arrowColorClass = useDarkUiChrome ? 'text-black/60' : 'text-white/60';
+	const outerBgClass = isTopLocationSlide
+		? 'bg-[#E7F432]'
+		: isMoneySavedSlide
+		? 'bg-[#f42d2d]'
+		: isMostExpensiveSlide
+		? 'bg-[#11d090]'
+		: isTimeOfDaySlide
+		? 'bg-[#514ac9]'
+		: 'bg-black';
+
 	if (isLoading) {
 		return <div className="p-4">Loading your wrapped…</div>;
 	}
@@ -149,16 +168,14 @@ export default function Wrapped() {
 	}
 
 	return (
-		<div className="w-screen h-screen flex items-center justify-center">
-			<div
-				className="relative w-[min(100vw,56.25vh)] aspect-9/16 rounded-2xl border overflow-hidden bg-black text-white select-none"
-			>
+		<div className={`w-screen h-screen flex items-center justify-center ${outerBgClass} transition-colors duration-300`}>
+			<div className="relative w-[min(100vw,56.25vh)] aspect-9/16 rounded-2xl overflow-hidden bg-black text-white select-none">
 				{/* Progress bars */}
-				<div className="absolute top-0 left-0 right-0 p-3 flex gap-1 pointer-events-none">
+				<div className="absolute top-0 left-0 right-0 p-3 flex gap-1 pointer-events-none z-20">
 					{slides.map((s, i) => (
-						<div key={s.key} className="flex-1 h-1.5 bg-white/30 rounded">
+						<div key={s.key} className={`flex-1 h-1.5 ${progressTrackClass} rounded`}>
 							<div
-								className="h-1.5 bg-white rounded"
+								className={`h-1.5 ${progressFillClass} rounded`}
 								style={{ width: `${i <= index ? 100 : 0}%` }}
 							/>
 						</div>
@@ -166,12 +183,12 @@ export default function Wrapped() {
 				</div>
 
 				{/* Arrow hints */}
-				<div className="pointer-events-none absolute inset-0">
+				<div className="pointer-events-none absolute inset-0 z-20">
 					<div className="absolute left-3 top-1/2 -translate-y-1/2">
-						<ChevronLeftIcon className="text-white/60" />
+						<ChevronLeftIcon className={arrowColorClass} />
 					</div>
 					<div className="absolute right-3 top-1/2 -translate-y-1/2">
-						<ChevronRightIcon className="text-white/60" />
+						<ChevronRightIcon className={arrowColorClass} />
 					</div>
 				</div>
 
@@ -199,7 +216,7 @@ export default function Wrapped() {
 						animate="center"
 						exit="exit"
 						transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
-						className="absolute inset-0 pointer-events-none"
+						className="absolute inset-0 pointer-events-none z-10"
 					>
 						<ActiveSlide data={data} onShare={handleShare} />
 					</motion.div>
