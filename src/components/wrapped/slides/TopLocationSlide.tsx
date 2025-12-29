@@ -84,14 +84,7 @@ export default function TopLocationSlide({ data }: SlideProps) {
 				</div>
 
 				<div className="flex items-center justify-center">
-					<a
-						href="https://wrapped.menu"
-						className="text-sm underline decoration-black"
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						https://wrapped.menu
-					</a>
+					<div className="text-sm underline decoration-black pointer-events-none">https://wrapped.menu</div>
 				</div>
 			</div>
 		</StorySlide>

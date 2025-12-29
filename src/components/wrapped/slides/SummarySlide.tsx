@@ -1,18 +1,126 @@
+import { useMemo } from 'react';
 import { StorySlide } from '../StorySlide';
 import type { SlideProps } from '../types';
+import { Share } from 'lucide-react';
+
+function formatCurrency(amount: number): string {
+	return Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
 
 export default function SummarySlide({ data, onShare }: SlideProps) {
+	const transactions = (data?.transactions ?? []) as Array<{
+		amount?: number;
+		locationName?: string;
+		patronFullName?: string;
+	}>;
+
+	const {
+		totalSpent,
+		totalTransactions,
+		uniqueLocationsCount,
+		topLocations,
+	} = useMemo(() => {
+		let spent = 0;
+		let txCount = 0;
+		const counts = new Map<string, number>();
+		const unique = new Set<string>();
+
+		for (const t of transactions) {
+			const amount = typeof t?.amount === 'number' ? t.amount : 0;
+			const location = String(t?.locationName ?? '').trim();
+			// Positive amounts are spends; negatives are refunds/credits
+			if (amount > 0) {
+				spent += amount;
+				txCount += 1;
+				if (location) {
+					unique.add(location);
+					counts.set(location, (counts.get(location) ?? 0) + 1);
+				}
+			}
+		}
+
+		const top = Array.from(counts.entries())
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 3)
+			.map(([name, count]) => ({ name, count }));
+
+		return {
+			totalSpent: spent,
+			totalTransactions: txCount,
+			uniqueLocationsCount: unique.size,
+			topLocations: top,
+		};
+	}, [transactions]);
+
+	const firstName = useMemo(() => {
+		const full =
+			transactions.find((t) => typeof t?.patronFullName === 'string' && t.patronFullName.trim().length > 0)
+				?.patronFullName ?? '';
+		const trimmed = full.trim();
+		if (!trimmed) return 'Your';
+		const parts = trimmed.split(/\s+/);
+		let first = parts[0] ?? '';
+		if (!first) return 'Your';
+		first = first.replace(/[^A-Za-z'\-]/g, '');
+		if (!first) return 'Your';
+		return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+	}, [transactions]);
+	const possessive = firstName === 'Your' ? 'Your' : `${firstName}\u2019s`;
+
 	return (
-		<StorySlide>
-			<h3 className="text-2xl font-semibold mb-2">Summary + Share</h3>
-			<p>A concise summary of your year. Share it!</p>
-			<div className="mt-6">
-				<button
-					className="px-4 py-2 border rounded bg-white text-black pointer-events-auto"
-					onClick={onShare}
-				>
-					Share
-				</button>
+		<StorySlide className="bg-sky-400 text-white font-bold p-0">
+			<div className="w-full max-w-md mx-auto px-6">
+				<div className="mb-0">
+					<div className="mt-1 text-3xl sm:text-4xl leading-tight text-red-600 outline-white-2 font-extrabold">
+						{possessive} Meal Plan Wrapped
+					</div>
+					<div className="text-white text-sm mt-2 underline decoration-white pointer-events-none">
+						https://wrapped.menu
+					</div>
+				</div>
+
+				<div className="grid grid-cols-1 gap-4 mt-2">
+					<div className="border-2 border-white p-5 text-left">
+						<div className="text-base leading-relaxed">Total spent</div>
+						<div className="text-3xl sm:text-4xl mt-1">{formatCurrency(totalSpent)}</div>
+					</div>
+
+					<div className="grid grid-cols-2 gap-4">
+						<div className="border-2 border-white p-5 text-center flex flex-col items-center justify-center h-32">
+							<div className="text-sm sm:text-base leading-relaxed whitespace-nowrap">Unique locations</div>
+							<div className="text-3xl sm:text-4xl mt-1">{uniqueLocationsCount}</div>
+						</div>
+						<div className="border-2 border-white p-5 text-center flex flex-col items-center justify-center h-32">
+							<div className="text-sm sm:text-base leading-relaxed whitespace-nowrap">Transactions</div>
+							<div className="text-3xl sm:text-4xl mt-1">{totalTransactions}</div>
+						</div>
+					</div>
+
+					{topLocations.length > 0 ? (
+						<div className="border-2 border-white p-5 text-left">
+							<div className="text-base leading-relaxed">Top spots</div>
+							<ul className="space-y-1 mt-2">
+								{topLocations.map((loc) => (
+									<li key={loc.name} className="flex items-center justify-between">
+										<span className="text-xl">{loc.name}</span>
+										<span className="text-white/85 text-sm">{loc.count}×</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					) : null}
+				</div>
+
+				<div className="mt-8 flex items-center justify-center gap-3">
+					<button
+						type="button"
+						className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+						onClick={onShare}
+					>
+						<span>Share</span>
+						<Share className="w-4 h-4" strokeWidth={3} />
+					</button>
+				</div>
 			</div>
 		</StorySlide>
 	);

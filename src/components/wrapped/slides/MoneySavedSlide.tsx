@@ -258,14 +258,7 @@ export default function MoneySavedSlide({ data }: SlideProps) {
 				</div>
 
 				<div className="mt-8 flex items-center justify-center">
-					<a
-						href="https://wrapped.menu"
-						className="text-sm underline decoration-white"
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						https://wrapped.menu
-					</a>
+					<div className="text-sm underline decoration-white pointer-events-none">https://wrapped.menu</div>
 				</div>
 			</div>
 		</StorySlide>
