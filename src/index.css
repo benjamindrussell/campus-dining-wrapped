@@ -23,3 +23,18 @@
     1.5px -1.5px #fff,
     -1.5px -1.5px #fff;
 }
+
+/* During image capture on Safari, switch to stroke to ensure outline appears in the render */
+.capture-outline .outline-white-2 {
+  /* Avoid Safari foreignObject defaulting stroke to black; emulate outline via drop-shadows */
+  text-shadow: none;
+  filter:
+    drop-shadow(2px 0 0 #fff)
+    drop-shadow(-2px 0 0 #fff)
+    drop-shadow(0 2px 0 #fff)
+    drop-shadow(0 -2px 0 #fff)
+    drop-shadow(1.5px 1.5px 0 #fff)
+    drop-shadow(-1.5px 1.5px 0 #fff)
+    drop-shadow(1.5px -1.5px 0 #fff)
+    drop-shadow(-1.5px -1.5px 0 #fff);
+}

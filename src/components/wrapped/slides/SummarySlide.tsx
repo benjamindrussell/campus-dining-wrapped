@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { StorySlide } from '../StorySlide';
 import type { SlideProps } from '../types';
-import { Share } from 'lucide-react';
+import { Share, Download, Copy } from 'lucide-react';
 
 function formatCurrency(amount: number): string {
 	return Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
-export default function SummarySlide({ data, onShare }: SlideProps) {
+export default function SummarySlide({ data, onShare, onDownloadImage, onCopyImage }: SlideProps) {
 	const transactions = (data?.transactions ?? []) as Array<{
 		amount?: number;
 		locationName?: string;
@@ -67,15 +67,25 @@ export default function SummarySlide({ data, onShare }: SlideProps) {
 	}, [transactions]);
 	const possessive = firstName === 'Your' ? 'Your' : `${firstName}\u2019s`;
 
+	// Capability detection for conditional actions
+	const supportsWebShare = typeof navigator !== 'undefined' && !!(navigator as unknown as { share?: unknown }).share;
+	const supportsImageCopy =
+		typeof window !== 'undefined' &&
+		'ClipboardItem' in window &&
+		typeof navigator !== 'undefined' &&
+		!!(navigator as unknown as { clipboard?: { write?: unknown } }).clipboard &&
+		!!(navigator as unknown as { clipboard?: { write?: unknown } }).clipboard?.write;
+
 	return (
-		<StorySlide className="bg-sky-400 text-white font-bold p-0">
+		<StorySlide className="bg-[#4dc6f9] text-white font-bold p-0">
 			<div className="w-full max-w-md mx-auto px-6">
 				<div className="mb-0">
 					<div className="mt-1 text-3xl sm:text-4xl leading-tight text-red-600 outline-white-2 font-extrabold">
 						{possessive} Meal Plan Wrapped
 					</div>
-					<div className="text-white text-sm mt-2 underline decoration-white pointer-events-none">
-						https://wrapped.menu
+					<div className="text-white text-base sm:text-lg mt-2">
+						Get yours at{' '}
+						<span className="underline decoration-white pointer-events-none">https://wrapped.menu</span>
 					</div>
 				</div>
 
@@ -111,15 +121,38 @@ export default function SummarySlide({ data, onShare }: SlideProps) {
 					) : null}
 				</div>
 
-				<div className="mt-8 flex items-center justify-center gap-3">
-					<button
-						type="button"
-						className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
-						onClick={onShare}
-					>
-						<span>Share</span>
-						<Share className="w-4 h-4" strokeWidth={3} />
-					</button>
+				<div className="mt-8 flex items-center justify-center gap-3" data-exclude-from-capture>
+					{supportsWebShare ? (
+						<button
+							type="button"
+							className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+							onClick={onShare}
+						>
+							<span>Share</span>
+							<Share className="w-4 h-4" strokeWidth={3} />
+						</button>
+					) : (
+						<>
+							<button
+								type="button"
+								className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+								onClick={onDownloadImage}
+							>
+								<span>Download</span>
+								<Download className="w-4 h-4" strokeWidth={3} />
+							</button>
+							{supportsImageCopy ? (
+								<button
+									type="button"
+									className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+									onClick={onCopyImage}
+								>
+									<span>Copy</span>
+									<Copy className="w-4 h-4" strokeWidth={3} />
+								</button>
+							) : null}
+						</>
+					)}
 				</div>
 			</div>
 		</StorySlide>
