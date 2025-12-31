@@ -1,13 +1,15 @@
 import { useMemo } from 'react';
 import { StorySlide } from '../StorySlide';
 import type { SlideProps } from '../types';
-import { Share, Download, Copy } from 'lucide-react';
+import { Share, Download, Copy, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function formatCurrency(amount: number): string {
 	return Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
 export default function SummarySlide({ data, onShare, onDownloadImage, onCopyImage }: SlideProps) {
+	const navigate = useNavigate();
 	const transactions = (data?.transactions ?? []) as Array<{
 		amount?: number;
 		locationName?: string;
@@ -123,16 +125,36 @@ export default function SummarySlide({ data, onShare, onDownloadImage, onCopyIma
 
 				<div className="mt-8 flex items-center justify-center gap-3" data-exclude-from-capture>
 					{supportsWebShare ? (
-						<button
-							type="button"
-							className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
-							onClick={onShare}
-						>
-							<span>Share</span>
-							<Share className="w-4 h-4" strokeWidth={3} />
-						</button>
+						<>
+							<button
+								type="button"
+								aria-label="Go home"
+								title="Home"
+								className="pointer-events-auto inline-flex items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer w-12 h-12"
+								onClick={() => navigate('/')}
+							>
+								<Home className="w-5 h-5" strokeWidth={3} />
+							</button>
+							<button
+								type="button"
+								className="pointer-events-auto inline-flex items-center justify-center gap-3 px-8 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+								onClick={onShare}
+							>
+								<span>Share</span>
+								<Share className="w-4 h-4" strokeWidth={3} />
+							</button>
+						</>
 					) : (
 						<>
+							<button
+								type="button"
+								aria-label="Go home"
+								title="Home"
+								className="pointer-events-auto inline-flex items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer w-12 h-12"
+								onClick={() => navigate('/')}
+							>
+								<Home className="w-5 h-5" strokeWidth={3} />
+							</button>
 							<button
 								type="button"
 								className="pointer-events-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"

@@ -441,5 +441,3 @@ export const MOCK_DATASETS: Record<'standard' | 'standardOver' | 'flex' | 'flyer
 export function buildMockTransactions(kind: 'standard' | 'standardOver' | 'flex' | 'flyer' | 'neighborhood'): Transaction[] {
 	return MOCK_DATASETS[kind];
 }
-
-

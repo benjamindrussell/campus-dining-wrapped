@@ -11,51 +11,64 @@ function getDefaultOldestDate(): string {
 	return startOfYear.toISOString();
 }
 
+export const TRANSACTIONS_QUERY_KEY = ['transactions'] as const;
+
+export async function fetchTransactions(params: {
+	ensureSessionId: () => Promise<string>;
+	refreshSessionId: () => Promise<string>;
+	setSessionId: (sessionId: string | null) => void;
+}): Promise<{ totalCount: number; transactions: Transaction[] }> {
+	// Developer-testing hook: support mock datasets via ?mock=standard|standardOver|flex|flyer|neighborhood
+	const mockKind =
+		typeof window !== 'undefined'
+			? new URLSearchParams(window.location.search).get('mock')
+			: null;
+	if (
+		mockKind === 'standard' ||
+		mockKind === 'standardOver' ||
+		mockKind === 'flex' ||
+		mockKind === 'flyer' ||
+		mockKind === 'neighborhood'
+	) {
+		const mocked = normalizeTransactions(buildMockTransactions(mockKind));
+		return { totalCount: mocked.length, transactions: mocked };
+	}
+	let sessionId = await params.ensureSessionId();
+	try {
+		const result = await retrieveTransactions({
+			sessionId,
+			oldestDate: getDefaultOldestDate(),
+			newestDate: null,
+			maxReturnMostRecent: 100,
+		});
+		const normalized = normalizeTransactions(result.transactions);
+		return { totalCount: normalized.length, transactions: normalized };
+	} catch (e) {
+		// Try once with a fresh session id (session might have expired)
+		sessionId = await params.refreshSessionId();
+		const result = await retrieveTransactions({
+			sessionId,
+			oldestDate: getDefaultOldestDate(),
+			newestDate: null,
+			maxReturnMostRecent: 100,
+		});
+		// Save the sessionId in case it changed
+		params.setSessionId(sessionId);
+		const normalized = normalizeTransactions(result.transactions);
+		return { totalCount: normalized.length, transactions: normalized };
+	}
+}
+
 export function useTransactions() {
-	const { ensureSessionId, setSessionId } = useAuth();
+	const { ensureSessionId, refreshSessionId, setSessionId } = useAuth();
 	return useQuery({
-		queryKey: ['transactions'],
-		queryFn: async (): Promise<{ totalCount: number; transactions: Transaction[] }> => {
-				// Developer-testing hook: support mock datasets via ?mock=standard|standardOver|flex|flyer|neighborhood
-				const mockKind =
-					typeof window !== 'undefined'
-						? new URLSearchParams(window.location.search).get('mock')
-						: null;
-				if (
-					mockKind === 'standard' ||
-					mockKind === 'standardOver' ||
-					mockKind === 'flex' ||
-					mockKind === 'flyer' ||
-					mockKind === 'neighborhood'
-				) {
-					const mocked = normalizeTransactions(buildMockTransactions(mockKind));
-					return { totalCount: mocked.length, transactions: mocked };
-				}
-			let sessionId = await ensureSessionId();
-			try {
-				const result = await retrieveTransactions({
-					sessionId,
-					oldestDate: getDefaultOldestDate(),
-					newestDate: null,
-					maxReturnMostRecent: 100,
-				});
-				const normalized = normalizeTransactions(result.transactions);
-				return { totalCount: normalized.length, transactions: normalized };
-			} catch (e) {
-				// Try once with a fresh session id (session might have expired)
-				sessionId = await ensureSessionId();
-				const result = await retrieveTransactions({
-					sessionId,
-					oldestDate: getDefaultOldestDate(),
-					newestDate: null,
-					maxReturnMostRecent: 100,
-				});
-				// Save the sessionId in case it changed
-				setSessionId(sessionId);
-				const normalized = normalizeTransactions(result.transactions);
-				return { totalCount: normalized.length, transactions: normalized };
-			}
-		},
+		queryKey: TRANSACTIONS_QUERY_KEY,
+		queryFn: () =>
+			fetchTransactions({
+				ensureSessionId,
+				refreshSessionId,
+				setSessionId,
+			}),
 		staleTime: 1000 * 60, // 1 minute
 	});
 }

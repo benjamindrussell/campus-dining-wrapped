@@ -11,6 +11,7 @@ import MostExpensiveSlide from '../components/wrapped/slides/MostExpensiveSlide'
 import MoneySavedSlide from '../components/wrapped/slides/MoneySavedSlide';
 import TimeOfDaySlide from '../components/wrapped/slides/TimeOfDaySlide';
 import SummarySlide from '../components/wrapped/slides/SummarySlide';
+import logo from '../assets/logo.png';
 
 export default function Wrapped() {
 	const { data, isLoading, isError, refetch } = useTransactions();
@@ -329,7 +330,8 @@ export default function Wrapped() {
 	const progressTrackClass = useDarkUiChrome ? 'bg-black/30' : 'bg-white/30';
 	const progressFillClass = useDarkUiChrome ? 'bg-black' : 'bg-white';
 	const arrowColorClass = useDarkUiChrome ? 'text-black/60' : 'text-white/60';
-	const outerBgClass = isSummarySlide
+	const isIntroSlide = slides[index].key === 'intro';
+	const outerBgClass = isSummarySlide || isIntroSlide
 		? 'bg-sky-400'
 		: isTopLocationSlide
 		? 'bg-[#E7F432]'
@@ -342,7 +344,24 @@ export default function Wrapped() {
 		: 'bg-black';
 
 	if (isLoading) {
-		return <div className="p-4">Loading your wrapped…</div>;
+		return (
+			<div className="min-h-screen w-full bg-sky-400 flex justify-center">
+				<main className="w-full max-w-[430px] min-h-screen p-4 flex flex-col">
+					<div className="flex flex-1 items-center justify-center">
+						<div className="flex flex-col items-center text-center space-y-4">
+							<div className="relative h-28 w-28">
+								<div className="absolute inset-0 -m-1 rounded-full border-4 border-white/30 border-t-red-500 animate-spin" />
+								<div className="absolute inset-0 flex items-center justify-center">
+									<img src={logo} alt="UDayton Meal Plan Wrapped logo" className="w-28 h-28" />
+								</div>
+							</div>
+							<p className="text-white font-semibold">Loading your wrapped…</p>
+							<p className="text-white/85 text-sm">This should only take a few seconds.</p>
+						</div>
+					</div>
+				</main>
+			</div>
+		);
 	}
 	if (isError) {
 		return (

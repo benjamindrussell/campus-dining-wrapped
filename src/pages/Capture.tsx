@@ -2,11 +2,20 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
+import { useQueryClient } from '@tanstack/react-query';
+import { TRANSACTIONS_QUERY_KEY, fetchTransactions } from '../hooks/useTransactions';
 
 export default function Capture() {
-	const { createCredentialsWithValidatorSession, isAuthenticated } = useAuth();
+	const {
+		createCredentialsWithValidatorSession,
+		isAuthenticated,
+		ensureSessionId,
+		refreshSessionId,
+		setSessionId,
+	} = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const queryClient = useQueryClient();
 	const [error, setError] = useState<string | null>(null);
 	const [working, setWorking] = useState(false);
 
@@ -17,20 +26,32 @@ export default function Capture() {
 			setError('Missing sessionId in URL.');
 			return;
 		}
-		if (isAuthenticated) {
-			// Already have credentials, go to wrapped
-			navigate('/wrapped', { replace: true });
-			return;
-		}
-		setWorking(true);
-		createCredentialsWithValidatorSession(sessionId)
-			.then(() => navigate('/wrapped', { replace: true }))
-			.catch((e) => {
+		async function run(validSessionId: string) {
+			try {
+				setWorking(true);
+				if (!isAuthenticated) {
+					await createCredentialsWithValidatorSession(validSessionId);
+				}
+				// Prefetch transactions so /wrapped does not show a second loader
+				await queryClient.prefetchQuery({
+					queryKey: TRANSACTIONS_QUERY_KEY,
+					queryFn: () =>
+						fetchTransactions({
+							ensureSessionId,
+							refreshSessionId,
+							setSessionId,
+						}),
+				});
+				navigate('/wrapped', { replace: true });
+			} catch (e) {
 				console.error(e);
-				setError('Failed to create credentials. Please try again.');
-			})
-			.finally(() => setWorking(false));
-	}, [location.search, createCredentialsWithValidatorSession, isAuthenticated, navigate]);
+				setError('Failed to set up your device. Please try again.');
+			} finally {
+				setWorking(false);
+			}
+		}
+		run(sessionId);
+	}, [location.search, createCredentialsWithValidatorSession, isAuthenticated, navigate, ensureSessionId, refreshSessionId, setSessionId, queryClient]);
 
 	return (
 		<div className="min-h-screen w-full bg-sky-400 flex justify-center">

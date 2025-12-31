@@ -5,22 +5,10 @@ import Onboarding from '../components/Onboarding';
 import { Github } from 'lucide-react';
 
 export default function Landing() {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, clearCredentials } = useAuth();
 	const navigate = useNavigate();
 	// Keep for future use if needed
 	useMemo(() => 'https://get.cbord.com/udayton/full/login.php?mobileapp=1', []);
-
-	if (isAuthenticated) {
-		// If already have deviceId + pin, send to wrapped
-		return (
-			<div className="p-4">
-				<p>You are already set up. Continue to your wrapped.</p>
-				<button onClick={() => navigate('/wrapped')} className="mt-2 underline">
-					Go to wrapped
-				</button>
-			</div>
-		);
-	}
 
 	return (
 		<div className="min-h-screen w-full bg-sky-400 flex justify-center">
@@ -37,9 +25,35 @@ export default function Landing() {
 					<p className="font-semibold italic max-w-[320px] text-white leading-relaxed">
 						Where did you eat? How much did you spend? When did you eat? How much 💸 did your plan save you… or lose you?
 					</p>
-					<Onboarding />
 				</div>
-				<footer className="mt-auto pt-8 text-xs text-white/85">
+				{isAuthenticated ? (
+					<div className="mt-6 flex items-center justify-center">
+						<div className="max-w-[400px] w-full text-center">
+							<div className="flex flex-col items-stretch justify-center gap-2 w-full max-w-[320px] mx-auto">
+								<button
+									onClick={() => navigate('/wrapped')}
+									className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 cursor-pointer"
+								>
+									View your Wrapped
+								</button>
+								<button
+									onClick={() => {
+										clearCredentials();
+										navigate('/');
+									}}
+									className="inline-flex items-center justify-center gap-2 self-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-white/90 cursor-pointer"
+								>
+									Log out
+								</button>
+							</div>
+						</div>
+					</div>
+				) : (
+					<div className="mt-6 flex items-center justify-center">
+						<Onboarding />
+					</div>
+				)}
+				<footer className="pt-8 text-xs text-white/85">
 					<div className="mx-auto max-w-[380px] rounded-xl border border-white/25 bg-white/10 px-4 py-4 space-y-3">
 						<p className="leading-relaxed">
 							🔒 This project works with <span className="font-semibold text-white">your dining data</span>. That's sensitive information, and you
