@@ -60,7 +60,12 @@ export default function Landing() {
 							should always be curious about how your data is accessed, processed, and stored.
 						</p>
 						<div className="pt-1">
-							<a href="/privacy" className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:text-white">
+							<a
+								href="https://github.com/benjamindrussell/campus-dining-wrapped?tab=readme-ov-file#security--privacy"
+								target="_blank"
+								rel="noreferrer"
+								className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:text-white"
+							>
 								Learn exactly how your data is handled →
 							</a>
 						</div>
