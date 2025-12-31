@@ -104,4 +104,19 @@ export async function retrieveTransactions(params: {
 	return json.response;
 }
 
+export async function retrieveUserId(params: { sessionId: string }): Promise<string> {
+	const { sessionId } = params;
+	const body = {
+		method: 'retrieve',
+		params: {
+			sessionId,
+		},
+	};
+	const json = await postJson<{ id: string }>('user', body);
+	if (json.exception) {
+		throw new Error(`retrieve user failed: ${JSON.stringify(json.exception)}`);
+	}
+	return json.response.id;
+}
+
 

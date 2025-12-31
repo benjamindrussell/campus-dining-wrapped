@@ -74,13 +74,6 @@ export default function Landing() {
 						>
 							<Github className="w-4 h-4" /> View source
 						</a>
-						<span className="text-white font-bold">·</span>
-						<p>
-							Built by{' '}
-							<a href="https://benrussell.tech" target="_blank" rel="noreferrer" className="font-semibold text-white underline underline-offset-2 hover:text-white/90">
-								Ben Russell
-							</a>
-						</p>
 					</div>
 				</footer>
 			</main>

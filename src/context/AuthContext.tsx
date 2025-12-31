@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { authenticatePin, createPin } from '../lib/api';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { authenticatePin, createPin, retrieveUserId } from '../lib/api';
 import {
 	loadCredentials,
 	saveCredentials,
@@ -9,6 +9,7 @@ import {
 	clearSessionId as clearStoredSessionId,
 } from '../lib/storage';
 import { generatePin4, generateUuidV4 } from '../lib/ids';
+import posthog from 'posthog-js';
 
 type AuthContextValue = {
 	deviceId: string | null;
@@ -31,6 +32,17 @@ export function AuthProvider(props: { children: React.ReactNode }) {
 	const [deviceId, setDeviceId] = useState<string | null>(existing?.deviceId ?? null);
 	const [pin, setPin] = useState<string | null>(existing?.pin ?? null);
 	const [sessionIdState, _setSessionIdState] = useState<string | null>(existingSessionId ?? null);
+
+	// Minimal, one-way hashing of CBORD user id so the raw id is never used
+	async function sha256Hex(input: string): Promise<string> {
+		const enc = new TextEncoder();
+		const data = enc.encode(input);
+		const hash = await crypto.subtle.digest('SHA-256', data);
+		const bytes = new Uint8Array(hash);
+		return Array.from(bytes)
+			.map((b) => b.toString(16).padStart(2, '0'))
+			.join('');
+	}
 
 	const setSessionId = useCallback((next: string | null) => {
 		if (next) {
@@ -109,6 +121,28 @@ export function AuthProvider(props: { children: React.ReactNode }) {
 		}),
 		[deviceId, pin, sessionIdState, setCredentials, clearCredentials, ensureSessionId, refreshSessionId, createCredentialsWithValidatorSession],
 	);
+
+	// Once a session id is present, retrieve the CBORD user id, hash it, and identify with PostHog.
+	useEffect(() => {
+		let aborted = false;
+		async function run() {
+			if (!sessionIdState) return;
+			try {
+				const rawUserId = await retrieveUserId({ sessionId: sessionIdState });
+				if (aborted) return;
+				const hashed = await sha256Hex(rawUserId);
+				if (aborted) return;
+				// Only associate a distinct id; no other tracking is enabled
+				posthog.identify(hashed);
+			} catch {
+				// Ignore analytics failures entirely
+			}
+		}
+		run();
+		return () => {
+			aborted = true;
+		};
+	}, [sessionIdState]);
 
 	return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
 }
