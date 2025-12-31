@@ -4,6 +4,8 @@ Spotify wrapped for GET dining services: https://wrapped.menu
 
 ## Security & Privacy
 
+TLDR: None of your data, session IDs, or user IDs are ever sent anyhwhere other that the GET service itself.
+
 Giving any external app access to your account carries risk. Always understand what an app does and how it handles your data before using it.
 
 How this app works:
