@@ -80,7 +80,7 @@ export async function retrieveTransactions(params: {
 		sessionId,
 		oldestDate,
 		newestDate = null,
-		maxReturnMostRecent = 100,
+		maxReturnMostRecent = 2000,
 		paymentSystemType = 0,
 		accountId = null,
 	} = params;
