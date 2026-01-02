@@ -5,10 +5,6 @@ import type { Transaction } from '../lib/types';
 import { useAuth } from '../context/AuthContext';
 import { buildMockTransactions } from '../lib/mockData';
 
-function getDefaultOldestDate(): string {
-	return '2025-06-22T02:51:37.467Z';
-}
-
 export const TRANSACTIONS_QUERY_KEY = ['transactions'] as const;
 
 export async function fetchTransactions(params: {
@@ -35,8 +31,8 @@ export async function fetchTransactions(params: {
 	try {
 		const result = await retrieveTransactions({
 			sessionId,
-			oldestDate: getDefaultOldestDate(),
-			newestDate: null,
+			oldestDate: '2025-08-22T00:00:00.000Z',
+			newestDate: '2025-12-12T23:59:59.999Z',
 			maxReturnMostRecent: 100,
 		});
 		const normalized = normalizeTransactions(result.transactions);
@@ -46,8 +42,8 @@ export async function fetchTransactions(params: {
 		sessionId = await params.refreshSessionId();
 		const result = await retrieveTransactions({
 			sessionId,
-			oldestDate: getDefaultOldestDate(),
-			newestDate: null,
+			oldestDate: '2025-08-22T00:00:00.000Z',
+			newestDate: '2025-12-12T23:59:59.999Z',
 			maxReturnMostRecent: 100,
 		});
 		// Save the sessionId in case it changed
