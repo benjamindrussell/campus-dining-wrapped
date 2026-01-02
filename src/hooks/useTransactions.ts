@@ -6,9 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { buildMockTransactions } from '../lib/mockData';
 
 function getDefaultOldestDate(): string {
-	const now = new Date();
-	const startOfYear = new Date(now.getFullYear(), 0, 1);
-	return startOfYear.toISOString();
+	return '2025-06-22T02:51:37.467Z';
 }
 
 export const TRANSACTIONS_QUERY_KEY = ['transactions'] as const;
